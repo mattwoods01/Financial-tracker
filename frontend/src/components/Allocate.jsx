@@ -65,6 +65,7 @@ export default function Allocate({ token }) {
 
   const useCombinedEmergencyFund = settings.use_brokerage_checking_as_emergency_fund;
   const useTransactionsForExpenses = settings.use_transactions_for_expenses;
+  const useTransactionsForIncome = settings.use_transactions_for_income;
 
   const field = (label, key, step, disabled = false) => (
     <label className="field" key={key}>
@@ -95,11 +96,29 @@ export default function Allocate({ token }) {
             key,
             step,
             (key === "emergency_fund_balance" && useCombinedEmergencyFund) ||
-              (key === "monthly_expenses_manual" && useTransactionsForExpenses)
+              (key === "monthly_expenses_manual" && useTransactionsForExpenses) ||
+              (key === "monthly_take_home" && useTransactionsForIncome)
           )
         )}
         {field("Roth % of new 401(k) contributions", "roth_percent", "5")}
       </div>
+
+      <label className="field checkbox-field">
+        <input
+          type="checkbox"
+          checked={useTransactionsForIncome}
+          onChange={(e) =>
+            setSettings({ ...settings, use_transactions_for_income: e.target.checked })
+          }
+        />
+        <span>Calculate my monthly take-home from Transactions instead</span>
+      </label>
+      {useTransactionsForIncome && allocation && (
+        <p className="empty-note" style={{ marginTop: 4 }}>
+          Using this month's income transactions (
+          <strong className="mono">{fmt(allocation.effective_income)}</strong> total) instead of the field above.
+        </p>
+      )}
 
       <label className="field checkbox-field">
         <input

@@ -53,6 +53,7 @@ class UserSettings(Base):
     checking_balance: Mapped[float] = mapped_column(Float, default=0)
     use_brokerage_checking_as_emergency_fund: Mapped[bool] = mapped_column(Boolean, default=False)
     use_transactions_for_expenses: Mapped[bool] = mapped_column(Boolean, default=False)
+    use_transactions_for_income: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")
 

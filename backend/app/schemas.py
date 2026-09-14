@@ -45,6 +45,7 @@ class SettingsBase(BaseModel):
     checking_balance: float = 0
     use_brokerage_checking_as_emergency_fund: bool = False
     use_transactions_for_expenses: bool = False
+    use_transactions_for_income: bool = False
 
 
 class SettingsUpdate(SettingsBase):
