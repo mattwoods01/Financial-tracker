@@ -19,6 +19,7 @@ _NEW_COLUMNS = {
         "use_brokerage_checking_as_emergency_fund": "BOOLEAN DEFAULT 0",
         "use_transactions_for_expenses": "BOOLEAN DEFAULT 0",
         "use_transactions_for_income": "BOOLEAN DEFAULT 0",
+        "disabled_allocation_steps": "VARCHAR DEFAULT ''",
     },
 }
 

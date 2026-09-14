@@ -46,6 +46,7 @@ class SettingsBase(BaseModel):
     use_brokerage_checking_as_emergency_fund: bool = False
     use_transactions_for_expenses: bool = False
     use_transactions_for_income: bool = False
+    disabled_allocation_steps: str = ""
 
 
 class SettingsUpdate(SettingsBase):
@@ -98,6 +99,7 @@ class AllocationStep(BaseModel):
     amount: float
     roth_amount: float | None = None
     traditional_amount: float | None = None
+    enabled: bool = True
     note: str
 
 

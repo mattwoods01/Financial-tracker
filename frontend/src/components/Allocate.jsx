@@ -58,6 +58,24 @@ export default function Allocate({ token }) {
     }
   };
 
+  const toggleStep = async (key) => {
+    const disabled = new Set(settings.disabled_allocation_steps ? settings.disabled_allocation_steps.split(",") : []);
+    if (disabled.has(key)) disabled.delete(key);
+    else disabled.add(key);
+    const nextSettings = { ...settings, disabled_allocation_steps: Array.from(disabled).join(",") };
+    setSettings(nextSettings);
+    setSaving(true);
+    try {
+      const updated = await api.updateSettings(token, nextSettings);
+      setSettings(updated);
+      setAllocation(await api.getAllocation(token));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <div className="panel"><p className="empty-note">Loading…</p></div>;
   if (!settings) return <div className="panel"><p className="auth-error">{error}</p></div>;
 
@@ -171,9 +189,20 @@ export default function Allocate({ token }) {
           </p>
           <div className="waterfall">
             {allocation.steps.map((s) => (
-              <div className="waterfall-row" key={s.key}>
+              <div className={"waterfall-row" + (s.enabled === false ? " disabled" : "")} key={s.key}>
                 <div className="waterfall-label">
-                  <span>{s.label}</span>
+                  <span className="waterfall-label-left">
+                    {s.key !== "debt-low" && (
+                      <input
+                        type="checkbox"
+                        checked={s.enabled !== false}
+                        disabled={saving}
+                        onChange={() => toggleStep(s.key)}
+                        title={s.enabled === false ? "Include this step in the monthly split" : "Exclude this step from the monthly split"}
+                      />
+                    )}
+                    <span>{s.label}</span>
+                  </span>
                   <span className="mono">{fmt(s.amount)}</span>
                 </div>
                 <div className="waterfall-bar-track">
