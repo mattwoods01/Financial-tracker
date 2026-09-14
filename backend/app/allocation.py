@@ -5,7 +5,7 @@ the single source of truth once both the web and mobile apps call this API inste
 of computing it client-side.
 """
 
-from app.models import Debt, UserSettings
+from app.models import Account, Debt, UserSettings
 from app.schemas import AllocationResult, AllocationStep
 
 HIGH_INTEREST_APR_THRESHOLD = 7.0  # roughly long-run stock market return
@@ -39,6 +39,7 @@ def compute_allocation(
     effective_income: float,
     effective_expenses: float,
     debts: list[Debt],
+    accounts: list[Account],
 ) -> AllocationResult:
     monthly_gross = settings.gross_annual_salary / 12
     match_limit_pct = settings.employer_match_limit / 100
@@ -102,15 +103,13 @@ def compute_allocation(
     ))
 
     # Step 3 — build the emergency fund
-    if settings.use_brokerage_checking_as_emergency_fund:
-        emergency_balance = settings.brokerage_balance + settings.checking_balance
-        source_note = (
-            f"Counting your brokerage + checking balances ({fmt(emergency_balance)} combined) as your "
-            f"emergency fund instead of a separate account. "
-        )
+    emergency_accounts = [a for a in accounts if a.counts_as_emergency_fund]
+    emergency_balance = sum(a.balance for a in emergency_accounts)
+    if emergency_accounts:
+        names = ", ".join(a.name for a in emergency_accounts)
+        source_note = f"Counting {names} ({fmt(emergency_balance)} combined) toward your emergency fund. "
     else:
-        emergency_balance = settings.emergency_fund_balance
-        source_note = ""
+        source_note = "No accounts are flagged to count toward your emergency fund yet — mark one in Accounts. "
     target_fund = settings.emergency_fund_target_months * effective_expenses
     fund_gap = max(target_fund - emergency_balance, 0)
     monthly_fund_target = 0.0 if "savings" in disabled_steps else (min(fund_gap / 6, remaining) if fund_gap > 0 else 0.0)
@@ -174,8 +173,10 @@ def compute_allocation(
         ))
 
     # Step 6 — top up the checking buffer toward its target, then brokerage gets the rest
+    checking_balance = sum(a.balance for a in accounts if a.type == "checking")
+    brokerage_balance = sum(a.balance for a in accounts if a.type == "brokerage")
     checking_target = CHECKING_BUFFER_TARGET_MONTHS * effective_expenses
-    checking_gap = max(checking_target - settings.checking_balance, 0)
+    checking_gap = max(checking_target - checking_balance, 0)
     checking_buffer = (
         0.0 if "checking" in disabled_steps else (min(remaining, checking_gap) if checking_gap > 0 else 0.0)
     )
@@ -192,8 +193,8 @@ def compute_allocation(
                 "Once the match, high-interest debt, emergency fund, and IRS-limited retirement room are "
                 "handled, extra surplus works well in a taxable brokerage or IRA."
                 + (
-                    f" You're currently holding {fmt(settings.brokerage_balance)} there."
-                    if settings.brokerage_balance > 0
+                    f" You're currently holding {fmt(brokerage_balance)} there."
+                    if brokerage_balance > 0
                     else ""
                 )
             )

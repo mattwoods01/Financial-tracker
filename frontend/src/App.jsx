@@ -3,8 +3,10 @@ import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
 import Overview from "./components/Overview";
 import Transactions from "./components/Transactions";
+import Accounts from "./components/Accounts";
 import Debts from "./components/Debts";
 import Allocate from "./components/Allocate";
+import NetWorth from "./components/NetWorth";
 
 const TOKEN_KEY = "ledger:token";
 
@@ -31,8 +33,10 @@ export default function App() {
       <Sidebar tab={tab} setTab={setTab} onLogout={handleLogout} />
       {tab === "overview" && <Overview token={token} />}
       {tab === "transactions" && <Transactions token={token} />}
+      {tab === "accounts" && <Accounts token={token} />}
       {tab === "debts" && <Debts token={token} />}
       {tab === "allocate" && <Allocate token={token} />}
+      {tab === "networth" && <NetWorth token={token} />}
     </div>
   );
 }

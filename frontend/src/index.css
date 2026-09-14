@@ -90,6 +90,11 @@ body {
 .empty-note { color: #6b6455; font-size: 13.5px; }
 .auth-error { color: var(--rust); font-size: 13.5px; margin: 4px 0 14px 0; }
 
+/* ---- Net worth ---- */
+.net-worth-hero { display: flex; align-items: baseline; gap: 14px; margin: 10px 0 22px 0; flex-wrap: wrap; }
+.net-worth-total { font-size: 40px; font-weight: 600; line-height: 1; }
+.net-worth-change { font-size: 13.5px; }
+
 .ledger-row-group { border-top: 1px solid var(--line); }
 .ledger-row { display: flex; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .ledger-row.total { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
@@ -110,7 +115,14 @@ body {
   margin-bottom: 22px;
   align-items: center;
 }
-.tx-form input, .tx-form select, .debt-form input {
+.account-form {
+  display: grid;
+  grid-template-columns: 1fr 150px 120px 170px auto;
+  gap: 8px;
+  margin-bottom: 22px;
+  align-items: center;
+}
+.tx-form input, .tx-form select, .debt-form input, .account-form input, .account-form select {
   font-family: inherit;
   font-size: 13px;
   padding: 7px 8px;
@@ -119,6 +131,8 @@ body {
   background: #fff;
   color: var(--charcoal);
 }
+.account-form-checkbox { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #514c3f; }
+.account-form-checkbox input { width: auto; }
 .btn-primary, .btn-secondary {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12.5px;
@@ -162,6 +176,31 @@ body {
 .debt-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
 .debt-row { border-bottom: 1px solid var(--line); }
 .debt-row.total-row { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
+
+.account-list-head, .account-row {
+  display: grid;
+  grid-template-columns: 1fr 150px 120px 130px 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 2px;
+  font-size: 13px;
+}
+.account-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
+.account-row { border-bottom: 1px solid var(--line); }
+.account-row.total-row { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
+.account-row input, .account-row select {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--charcoal);
+}
+.account-row input:hover, .account-row select:hover,
+.account-row input:focus, .account-row select:focus { border-color: var(--line); background: #fff; }
+.account-row input[type="checkbox"] { width: auto; justify-self: center; }
+.center { text-align: center; }
 
 /* ---- Settings fields ---- */
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }

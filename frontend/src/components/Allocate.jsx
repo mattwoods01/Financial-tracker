@@ -18,10 +18,7 @@ const FIELDS = [
   ["Current 401(k) contribution (% of salary)", "current_contribution_percent", "0.5"],
   ["Employer match caps out at (% of salary)", "employer_match_limit", "0.5"],
   ["Age", "age", "1"],
-  ["Emergency fund balance ($)", "emergency_fund_balance", "1"],
   ["Emergency fund target (months of expenses)", "emergency_fund_target_months", "1"],
-  ["Brokerage balance ($)", "brokerage_balance", "1"],
-  ["Checking balance ($)", "checking_balance", "1"],
 ];
 
 export default function Allocate({ token }) {
@@ -81,7 +78,6 @@ export default function Allocate({ token }) {
 
   const maxAmt = allocation ? Math.max(...allocation.steps.map((s) => s.amount), 1) : 1;
 
-  const useCombinedEmergencyFund = settings.use_brokerage_checking_as_emergency_fund;
   const useTransactionsForExpenses = settings.use_transactions_for_expenses;
   const useTransactionsForIncome = settings.use_transactions_for_income;
 
@@ -113,8 +109,7 @@ export default function Allocate({ token }) {
             label,
             key,
             step,
-            (key === "emergency_fund_balance" && useCombinedEmergencyFund) ||
-              (key === "monthly_expenses_manual" && useTransactionsForExpenses) ||
+            (key === "monthly_expenses_manual" && useTransactionsForExpenses) ||
               (key === "monthly_take_home" && useTransactionsForIncome)
           )
         )}
@@ -155,23 +150,10 @@ export default function Allocate({ token }) {
         </p>
       )}
 
-      <label className="field checkbox-field">
-        <input
-          type="checkbox"
-          checked={useCombinedEmergencyFund}
-          onChange={(e) =>
-            setSettings({ ...settings, use_brokerage_checking_as_emergency_fund: e.target.checked })
-          }
-        />
-        <span>Treat my brokerage + checking balances as my emergency fund</span>
-      </label>
-      {useCombinedEmergencyFund && (
-        <p className="empty-note" style={{ marginTop: 4 }}>
-          Using brokerage + checking (
-          <strong className="mono">{fmt(settings.brokerage_balance + settings.checking_balance)}</strong> combined)
-          as your emergency fund balance instead of the field above.
-        </p>
-      )}
+      <p className="empty-note" style={{ marginTop: 4 }}>
+        Emergency fund balance now comes from Accounts — check "counts as emergency fund" on any account there
+        (checking, savings, brokerage, whatever you actually keep it in) and its balance feeds the target above.
+      </p>
 
       <p className="empty-note" style={{ marginTop: 8 }}>
         Rough starting point at this salary: <strong className="mono">{suggestedRothPercent(settings.gross_annual_salary)}% Roth</strong>.

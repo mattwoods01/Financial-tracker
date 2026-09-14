@@ -38,12 +38,8 @@ class SettingsBase(BaseModel):
     current_contribution_percent: float = 4
     employer_match_limit: float = 6
     age: int = 30
-    emergency_fund_balance: float = 4000
     emergency_fund_target_months: float = 6
     roth_percent: float = Field(default=60, ge=0, le=100)
-    brokerage_balance: float = 0
-    checking_balance: float = 0
-    use_brokerage_checking_as_emergency_fund: bool = False
     use_transactions_for_expenses: bool = False
     use_transactions_for_income: bool = False
     disabled_allocation_steps: str = ""
@@ -91,6 +87,29 @@ class DebtOut(DebtCreate):
         from_attributes = True
 
 
+# ---- Accounts ----
+
+AccountType = Literal["checking", "savings", "brokerage", "retirement", "other"]
+
+
+class AccountCreate(BaseModel):
+    name: str
+    type: AccountType = "other"
+    balance: float = 0
+    counts_as_emergency_fund: bool = False
+
+
+class AccountUpdate(AccountCreate):
+    pass
+
+
+class AccountOut(AccountCreate):
+    id: str
+
+    class Config:
+        from_attributes = True
+
+
 # ---- Allocation ----
 
 class AllocationStep(BaseModel):
@@ -108,3 +127,23 @@ class AllocationResult(BaseModel):
     effective_expenses: float
     surplus: float
     steps: list[AllocationStep]
+
+
+# ---- Net worth ----
+
+class NetWorthPoint(BaseModel):
+    date: date
+    net_worth: float
+
+
+class NetWorthTypeTotal(BaseModel):
+    type: str
+    total: float
+
+
+class NetWorthOut(BaseModel):
+    total_assets: float
+    total_debt: float
+    net_worth: float
+    by_type: list[NetWorthTypeTotal]
+    history: list[NetWorthPoint]

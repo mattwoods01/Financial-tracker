@@ -59,5 +59,12 @@ export const api = {
   addDebt: (token, debt) => request("/debts", { method: "POST", body: debt, token }),
   deleteDebt: (token, id) => request(`/debts/${id}`, { method: "DELETE", token }),
 
+  getAccounts: (token) => request("/accounts", { token }),
+  addAccount: (token, account) => request("/accounts", { method: "POST", body: account, token }),
+  updateAccount: (token, id, account) => request(`/accounts/${id}`, { method: "PUT", body: account, token }),
+  deleteAccount: (token, id) => request(`/accounts/${id}`, { method: "DELETE", token }),
+
   getAllocation: (token) => request("/allocate", { token }),
+
+  getNetWorth: (token) => request("/networth", { token }),
 };

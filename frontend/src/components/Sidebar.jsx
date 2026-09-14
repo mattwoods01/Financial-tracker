@@ -1,11 +1,13 @@
 import React from "react";
-import { LayoutGrid, Receipt, Landmark, CreditCard, LogOut } from "lucide-react";
+import { LayoutGrid, Receipt, Landmark, CreditCard, Wallet, TrendingUp, LogOut } from "lucide-react";
 
 export default function Sidebar({ tab, setTab, onLogout }) {
   const items = [
     { id: "overview", label: "Overview", icon: LayoutGrid },
     { id: "transactions", label: "Transactions", icon: Receipt },
+    { id: "accounts", label: "Accounts", icon: Wallet },
     { id: "debts", label: "Debts", icon: CreditCard },
+    { id: "networth", label: "Net Worth", icon: TrendingUp },
     { id: "allocate", label: "Allocate", icon: Landmark },
   ];
   return (

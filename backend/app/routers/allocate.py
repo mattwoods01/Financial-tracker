@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.allocation import compute_allocation
 from app.auth import get_current_user
 from app.database import get_db
-from app.models import Debt, Transaction, User, UserSettings
+from app.models import Account, Debt, Transaction, User, UserSettings
 from app.schemas import AllocationResult
 
 router = APIRouter(prefix="/allocate", tags=["allocate"])
@@ -22,6 +22,7 @@ def get_allocation(db: Session = Depends(get_db), user: User = Depends(get_curre
         db.refresh(settings)
 
     debts = db.query(Debt).filter(Debt.user_id == user.id).all()
+    accounts = db.query(Account).filter(Account.user_id == user.id).all()
 
     today = date.today()
     month_start = today.replace(day=1)
@@ -42,4 +43,4 @@ def get_allocation(db: Session = Depends(get_db), user: User = Depends(get_curre
     else:
         effective_expenses = settings.monthly_expenses_manual
 
-    return compute_allocation(settings, effective_income, effective_expenses, debts)
+    return compute_allocation(settings, effective_income, effective_expenses, debts, accounts)
