@@ -16,8 +16,6 @@ Base.metadata.create_all(bind=engine)
 # so a pre-existing local database picks up columns added after the table first existed.
 _NEW_COLUMNS = {
     "user_settings": {
-        "use_transactions_for_expenses": "BOOLEAN DEFAULT 0",
-        "use_transactions_for_income": "BOOLEAN DEFAULT 0",
         "disabled_allocation_steps": "VARCHAR DEFAULT ''",
     },
 }

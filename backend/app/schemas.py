@@ -33,15 +33,11 @@ class Token(BaseModel):
 
 class SettingsBase(BaseModel):
     gross_annual_salary: float = 90000
-    monthly_take_home: float = 5200
-    monthly_expenses_manual: float = 3600
     current_contribution_percent: float = 4
     employer_match_limit: float = 6
     age: int = 30
     emergency_fund_target_months: float = 6
     roth_percent: float = Field(default=60, ge=0, le=100)
-    use_transactions_for_expenses: bool = False
-    use_transactions_for_income: bool = False
     disabled_allocation_steps: str = ""
 
 

@@ -21,16 +21,13 @@ const monthKey = (isoDate) => isoDate.slice(0, 7);
 
 export default function Overview({ token }) {
   const [transactions, setTransactions] = useState([]);
-  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
-        const [tx, s] = await Promise.all([api.getTransactions(token), api.getSettings(token)]);
-        setTransactions(tx);
-        setSettings(s);
+        setTransactions(await api.getTransactions(token));
       } catch (err) {
         setError(err.message);
       } finally {
@@ -41,11 +38,8 @@ export default function Overview({ token }) {
 
   const thisMonth = monthKey(new Date().toISOString().slice(0, 10));
   const monthTx = transactions.filter((t) => monthKey(t.date) === thisMonth);
-  const monthIncome = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const monthExpenses = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-
-  const effectiveIncome = settings && settings.monthly_take_home > 0 ? settings.monthly_take_home : monthIncome;
-  const effectiveExpenses = monthExpenses > 0 ? monthExpenses : settings?.monthly_expenses_manual || 0;
+  const effectiveIncome = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const effectiveExpenses = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const net = effectiveIncome - effectiveExpenses;
 
   const categoryBreakdown = useMemo(() => {

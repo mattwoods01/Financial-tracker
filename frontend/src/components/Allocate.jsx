@@ -13,8 +13,6 @@ function suggestedRothPercent(grossAnnualSalary) {
 
 const FIELDS = [
   ["Gross annual salary ($)", "gross_annual_salary", "1"],
-  ["Monthly take-home pay ($)", "monthly_take_home", "1"],
-  ["Monthly expenses ($)", "monthly_expenses_manual", "1"],
   ["Current 401(k) contribution (% of salary)", "current_contribution_percent", "0.5"],
   ["Employer match caps out at (% of salary)", "employer_match_limit", "0.5"],
   ["Age", "age", "1"],
@@ -78,17 +76,13 @@ export default function Allocate({ token }) {
 
   const maxAmt = allocation ? Math.max(...allocation.steps.map((s) => s.amount), 1) : 1;
 
-  const useTransactionsForExpenses = settings.use_transactions_for_expenses;
-  const useTransactionsForIncome = settings.use_transactions_for_income;
-
-  const field = (label, key, step, disabled = false) => (
+  const field = (label, key, step) => (
     <label className="field" key={key}>
       <span>{label}</span>
       <input
         type="number"
         step={step}
         value={settings[key]}
-        disabled={disabled}
         onChange={(e) => setSettings({ ...settings, [key]: parseFloat(e.target.value) || 0 })}
       />
     </label>
@@ -104,49 +98,16 @@ export default function Allocate({ token }) {
 
       <h2 className="section-title">Your numbers</h2>
       <div className="field-grid">
-        {FIELDS.map(([label, key, step]) =>
-          field(
-            label,
-            key,
-            step,
-            (key === "monthly_expenses_manual" && useTransactionsForExpenses) ||
-              (key === "monthly_take_home" && useTransactionsForIncome)
-          )
-        )}
+        {FIELDS.map(([label, key, step]) => field(label, key, step))}
         {field("Roth % of new 401(k) contributions", "roth_percent", "5")}
       </div>
 
-      <label className="field checkbox-field">
-        <input
-          type="checkbox"
-          checked={useTransactionsForIncome}
-          onChange={(e) =>
-            setSettings({ ...settings, use_transactions_for_income: e.target.checked })
-          }
-        />
-        <span>Calculate my monthly take-home from Transactions instead</span>
-      </label>
-      {useTransactionsForIncome && allocation && (
+      {allocation && (
         <p className="empty-note" style={{ marginTop: 4 }}>
-          Using this month's income transactions (
-          <strong className="mono">{fmt(allocation.effective_income)}</strong> total) instead of the field above.
-        </p>
-      )}
-
-      <label className="field checkbox-field">
-        <input
-          type="checkbox"
-          checked={useTransactionsForExpenses}
-          onChange={(e) =>
-            setSettings({ ...settings, use_transactions_for_expenses: e.target.checked })
-          }
-        />
-        <span>Calculate my monthly expenses from Transactions + Debts instead</span>
-      </label>
-      {useTransactionsForExpenses && allocation && (
-        <p className="empty-note" style={{ marginTop: 4 }}>
-          Using this month's expense transactions plus debt minimum payments (
-          <strong className="mono">{fmt(allocation.effective_expenses)}</strong> total) instead of the field above.
+          Income and expenses for this waterfall come solely from this month's Transactions:{" "}
+          <strong className="mono">{fmt(allocation.effective_income)}</strong> income,{" "}
+          <strong className="mono">{fmt(allocation.effective_expenses)}</strong> expenses. Log transactions to
+          keep this accurate.
         </p>
       )}
 

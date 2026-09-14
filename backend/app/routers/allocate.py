@@ -31,16 +31,8 @@ def get_allocation(db: Session = Depends(get_db), user: User = Depends(get_curre
         .filter(Transaction.user_id == user.id, Transaction.date >= month_start)
         .all()
     )
-    month_income = sum(t.amount for t in month_txs if t.type == "income")
-    month_expenses = sum(t.amount for t in month_txs if t.type == "expense")
-
-    if settings.use_transactions_for_income:
-        effective_income = month_income
-    else:
-        effective_income = settings.monthly_take_home
-    if settings.use_transactions_for_expenses:
-        effective_expenses = month_expenses + sum(d.min_payment for d in debts)
-    else:
-        effective_expenses = settings.monthly_expenses_manual
+    # Income and expenses come solely from this month's Transactions — no manual override.
+    effective_income = sum(t.amount for t in month_txs if t.type == "income")
+    effective_expenses = sum(t.amount for t in month_txs if t.type == "expense")
 
     return compute_allocation(settings, effective_income, effective_expenses, debts, accounts)

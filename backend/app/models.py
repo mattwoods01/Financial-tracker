@@ -47,15 +47,11 @@ class UserSettings(Base):
     user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), unique=True, nullable=False)
 
     gross_annual_salary: Mapped[float] = mapped_column(Float, default=90000)
-    monthly_take_home: Mapped[float] = mapped_column(Float, default=5200)
-    monthly_expenses_manual: Mapped[float] = mapped_column(Float, default=3600)
     current_contribution_percent: Mapped[float] = mapped_column(Float, default=4)
     employer_match_limit: Mapped[float] = mapped_column(Float, default=6)
     age: Mapped[int] = mapped_column(Integer, default=30)
     emergency_fund_target_months: Mapped[float] = mapped_column(Float, default=6)
     roth_percent: Mapped[float] = mapped_column(Float, default=60)
-    use_transactions_for_expenses: Mapped[bool] = mapped_column(Boolean, default=False)
-    use_transactions_for_income: Mapped[bool] = mapped_column(Boolean, default=False)
     # Comma-separated AllocationStep keys the user has turned off (e.g. "debt,checking").
     disabled_allocation_steps: Mapped[str] = mapped_column(String, default="")
 
