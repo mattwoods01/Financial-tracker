@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink: #16332B;
+  --paper: #F6F2E9;
+  --paper-alt: #EFE9DA;
+  --gold: #B8925A;
+  --rust: #A24936;
+  --sage: #D9D2BE;
+  --charcoal: #232019;
+  --line: #C9C0AA;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--paper);
+  color: var(--charcoal);
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.dim { color: #6b6455; }
+.positive { color: #3E6B52; }
+.negative { color: var(--rust); }
+.right { text-align: right; }
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: 190px;
+  flex-shrink: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 24px 14px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 10px 22px 10px;
+  border-bottom: 1px solid rgba(246,242,233,0.18);
+  margin-bottom: 16px;
+}
+.brand-mark { font-family: 'Source Serif 4', serif; font-size: 22px; color: var(--gold); }
+.brand-name { font-family: 'Source Serif 4', serif; font-size: 17px; letter-spacing: 0.02em; }
+.sidebar ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(246,242,233,0.78);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 9px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+}
+.nav-item:hover { background: rgba(246,242,233,0.08); color: var(--paper); }
+.nav-item.active { background: rgba(184,146,90,0.18); color: var(--gold); }
+.nav-item.logout { margin-top: auto; }
+
+/* ---- Panel ---- */
+.panel { flex: 1; padding: 32px 40px; max-width: 780px; }
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--charcoal);
+  padding-bottom: 10px;
+  margin-bottom: 22px;
+}
+.panel-head h1 { font-family: 'Source Serif 4', serif; font-weight: 600; font-size: 26px; margin: 0; }
+.month-label { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #6b6455; }
+
+.section-title { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 600; margin: 26px 0 12px 0; }
+.empty-note { color: #6b6455; font-size: 13.5px; }
+.auth-error { color: var(--rust); font-size: 13.5px; margin: 4px 0 14px 0; }
+
+.ledger-row-group { border-top: 1px solid var(--line); }
+.ledger-row { display: flex; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.ledger-row.total { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
+.ledger-row .mono { font-size: 14.5px; }
+
+/* ---- Transaction / debt forms ---- */
+.tx-form {
+  display: grid;
+  grid-template-columns: 130px 1fr 110px 130px 100px auto;
+  gap: 8px;
+  margin-bottom: 22px;
+  align-items: center;
+}
+.debt-form {
+  display: grid;
+  grid-template-columns: 1fr 130px 110px 130px auto;
+  gap: 8px;
+  margin-bottom: 22px;
+  align-items: center;
+}
+.tx-form input, .tx-form select, .debt-form input {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--charcoal);
+}
+.btn-primary, .btn-secondary {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: #1f4438; }
+.btn-primary:disabled { opacity: 0.6; cursor: default; }
+.btn-secondary { background: transparent; border: 1px solid var(--charcoal); color: var(--charcoal); margin-top: 6px; }
+.btn-secondary:hover { background: var(--sage); }
+.btn-secondary:disabled { opacity: 0.6; cursor: default; }
+
+.tx-list { border-top: 1px solid var(--line); }
+.tx-list-head, .tx-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 120px 100px 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 2px;
+  font-size: 13px;
+}
+.tx-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
+.tx-row { border-bottom: 1px solid var(--line); }
+.icon-btn { background: none; border: none; cursor: pointer; color: #948c78; padding: 4px; }
+.icon-btn:hover { color: var(--rust); }
+
+.debt-list-head, .debt-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 80px 110px 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 2px;
+  font-size: 13px;
+}
+.debt-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
+.debt-row { border-bottom: 1px solid var(--line); }
+.debt-row.total-row { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
+
+/* ---- Settings fields ---- */
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: #514c3f; }
+.field input {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--charcoal);
+}
+
+/* ---- Waterfall ---- */
+.waterfall { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+.waterfall-label { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
+.waterfall-bar-track { height: 8px; background: var(--paper-alt); overflow: hidden; }
+.waterfall-bar-fill { height: 100%; background: var(--gold); }
+.waterfall-note { font-size: 12.5px; color: #6b6455; margin: 6px 0 0 0; line-height: 1.4; }
+.disclaimer { font-size: 11.5px; color: #948c78; margin-top: 28px; border-top: 1px solid var(--line); padding-top: 14px; line-height: 1.5; }
+.roth-split { display: flex; gap: 18px; font-size: 12px; color: #514c3f; margin-top: 6px; }
+
+/* ---- Auth screen ---- */
+.auth-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+}
+.auth-card {
+  width: 340px;
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-title { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; margin: 0 0 6px 0; }
+.auth-switch {
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-size: 12.5px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 0 0 0;
+  text-align: left;
+}
