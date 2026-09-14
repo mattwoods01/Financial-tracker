@@ -10,6 +10,7 @@ from app.schemas import AllocationResult, AllocationStep
 
 HIGH_INTEREST_APR_THRESHOLD = 7.0  # roughly long-run stock market return
 IRS_2026_EMPLOYEE_LIMIT = 24500.0
+CHECKING_BUFFER_TARGET_MONTHS = 0.5  # keep roughly half a month of expenses on hand
 
 
 def fmt(n: float) -> str:
@@ -85,8 +86,17 @@ def compute_allocation(
     ))
 
     # Step 3 — build the emergency fund
+    if settings.use_brokerage_checking_as_emergency_fund:
+        emergency_balance = settings.brokerage_balance + settings.checking_balance
+        source_note = (
+            f"Counting your brokerage + checking balances ({fmt(emergency_balance)} combined) as your "
+            f"emergency fund instead of a separate account. "
+        )
+    else:
+        emergency_balance = settings.emergency_fund_balance
+        source_note = ""
     target_fund = settings.emergency_fund_target_months * effective_expenses
-    fund_gap = max(target_fund - settings.emergency_fund_balance, 0)
+    fund_gap = max(target_fund - emergency_balance, 0)
     monthly_fund_target = min(fund_gap / 6, remaining) if fund_gap > 0 else 0.0
     remaining -= monthly_fund_target
     steps.append(AllocationStep(
@@ -94,10 +104,10 @@ def compute_allocation(
         label="Savings — emergency fund",
         amount=monthly_fund_target,
         note=(
-            f"Target is {settings.emergency_fund_target_months:g} months of expenses ({fmt(target_fund)}). "
-            f"You're {fmt(fund_gap)} short — this pace fills it in about 6 months."
+            f"{source_note}Target is {settings.emergency_fund_target_months:g} months of expenses "
+            f"({fmt(target_fund)}). You're {fmt(fund_gap)} short — this pace fills it in about 6 months."
             if fund_gap > 0
-            else "Emergency fund is already at or above target."
+            else f"{source_note}Emergency fund is already at or above target."
         ),
     ))
 
@@ -136,8 +146,10 @@ def compute_allocation(
             ),
         ))
 
-    # Step 6 — brokerage, with a small checking buffer left over
-    checking_buffer = min(remaining * 0.15, 200)
+    # Step 6 — top up the checking buffer toward its target, then brokerage gets the rest
+    checking_target = CHECKING_BUFFER_TARGET_MONTHS * effective_expenses
+    checking_gap = max(checking_target - settings.checking_balance, 0)
+    checking_buffer = min(remaining, checking_gap) if checking_gap > 0 else 0.0
     brokerage = max(remaining - checking_buffer, 0)
     steps.append(AllocationStep(
         key="brokerage",
@@ -146,13 +158,24 @@ def compute_allocation(
         note=(
             "Once the match, high-interest debt, emergency fund, and IRS-limited retirement room are "
             "handled, extra surplus works well in a taxable brokerage or IRA."
+            + (
+                f" You're currently holding {fmt(settings.brokerage_balance)} there."
+                if settings.brokerage_balance > 0
+                else ""
+            )
         ),
     ))
     steps.append(AllocationStep(
         key="checking",
         label="Checking — buffer",
         amount=checking_buffer,
-        note="A small cushion left in checking for timing gaps between paychecks and bills.",
+        note=(
+            f"Target buffer is {fmt(checking_target)} ({CHECKING_BUFFER_TARGET_MONTHS:g} months of expenses) "
+            f"for timing gaps between paychecks and bills. You're {fmt(checking_gap)} short — topping that up "
+            f"here."
+            if checking_gap > 0
+            else "Checking buffer is already at or above target — all remaining surplus goes to brokerage/IRA instead."
+        ),
     ))
 
     return AllocationResult(

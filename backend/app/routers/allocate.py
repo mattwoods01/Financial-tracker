@@ -34,6 +34,9 @@ def get_allocation(db: Session = Depends(get_db), user: User = Depends(get_curre
     month_expenses = sum(t.amount for t in month_txs if t.type == "expense")
 
     effective_income = settings.monthly_take_home if settings.monthly_take_home > 0 else month_income
-    effective_expenses = month_expenses if month_expenses > 0 else settings.monthly_expenses_manual
+    if settings.use_transactions_for_expenses:
+        effective_expenses = month_expenses + sum(d.min_payment for d in debts)
+    else:
+        effective_expenses = settings.monthly_expenses_manual
 
     return compute_allocation(settings, effective_income, effective_expenses, debts)

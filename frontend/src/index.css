@@ -175,6 +175,9 @@ body {
   background: #fff;
   color: var(--charcoal);
 }
+.field input:disabled { background: var(--paper-alt); color: #a39c8a; }
+.checkbox-field { flex-direction: row; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; }
+.checkbox-field input { width: auto; }
 
 /* ---- Waterfall ---- */
 .waterfall { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }

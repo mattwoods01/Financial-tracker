@@ -49,6 +49,10 @@ class UserSettings(Base):
     emergency_fund_balance: Mapped[float] = mapped_column(Float, default=4000)
     emergency_fund_target_months: Mapped[float] = mapped_column(Float, default=6)
     roth_percent: Mapped[float] = mapped_column(Float, default=60)
+    brokerage_balance: Mapped[float] = mapped_column(Float, default=0)
+    checking_balance: Mapped[float] = mapped_column(Float, default=0)
+    use_brokerage_checking_as_emergency_fund: Mapped[bool] = mapped_column(Boolean, default=False)
+    use_transactions_for_expenses: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user: Mapped["User"] = relationship("User", back_populates="settings")
 

@@ -41,6 +41,10 @@ class SettingsBase(BaseModel):
     emergency_fund_balance: float = 4000
     emergency_fund_target_months: float = 6
     roth_percent: float = Field(default=60, ge=0, le=100)
+    brokerage_balance: float = 0
+    checking_balance: float = 0
+    use_brokerage_checking_as_emergency_fund: bool = False
+    use_transactions_for_expenses: bool = False
 
 
 class SettingsUpdate(SettingsBase):
