@@ -10,6 +10,47 @@ const CATEGORIES = [
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmt2 = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+function TransactionTable({ title, rows, showCategory, onDelete }) {
+  const total = rows.reduce((s, t) => s + t.amount, 0);
+  const rowClass = "tx-row" + (showCategory ? "" : " no-category");
+
+  return (
+    <div className="tx-table">
+      <h2 className="section-title" style={{ marginTop: 0 }}>{title}</h2>
+      <div className="tx-list">
+        <div className={"tx-list-head" + (showCategory ? "" : " no-category")}>
+          <span>Date</span>
+          <span>Description</span>
+          {showCategory && <span>Category</span>}
+          <span className="right">Amount</span>
+          <span></span>
+        </div>
+        {rows.length === 0 && <p className="empty-note">No {title.toLowerCase()} yet.</p>}
+        {rows.map((t) => (
+          <div className={rowClass} key={t.id}>
+            <span className="mono dim">{t.date}</span>
+            <span>{t.description}</span>
+            {showCategory && <span className="dim">{t.category}</span>}
+            <span className={"mono right" + (!showCategory ? " positive" : "")}>
+              {!showCategory ? "+" : "-"}{fmt2(t.amount)}
+            </span>
+            <button className="icon-btn" onClick={() => onDelete(t.id)} aria-label="Delete"><Trash2 size={14} /></button>
+          </div>
+        ))}
+        {rows.length > 0 && (
+          <div className={rowClass + " total-row"}>
+            <span>Total</span>
+            <span></span>
+            {showCategory && <span></span>}
+            <span className={"mono right" + (!showCategory ? " positive" : "")}>{fmt2(total)}</span>
+            <span></span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Transactions({ token }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +92,8 @@ export default function Transactions({ token }) {
   };
 
   const sorted = [...transactions].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const income = sorted.filter((t) => t.type === "income");
+  const expenses = sorted.filter((t) => t.type === "expense");
 
   return (
     <div className="panel">
@@ -87,24 +130,13 @@ export default function Transactions({ token }) {
         <button type="submit" className="btn-primary"><Plus size={15} /> Add</button>
       </form>
 
-      <div className="tx-list">
-        <div className="tx-list-head">
-          <span>Date</span><span>Description</span><span>Category</span><span className="right">Amount</span><span></span>
+      {loading && <p className="empty-note">Loading…</p>}
+      {!loading && (
+        <div className="tx-tables">
+          <TransactionTable title="Income" rows={income} showCategory={false} onDelete={remove} />
+          <TransactionTable title="Expenses" rows={expenses} showCategory onDelete={remove} />
         </div>
-        {loading && <p className="empty-note">Loading…</p>}
-        {!loading && sorted.length === 0 && <p className="empty-note">No transactions yet.</p>}
-        {sorted.map((t) => (
-          <div className="tx-row" key={t.id}>
-            <span className="mono dim">{t.date}</span>
-            <span>{t.description}</span>
-            <span className="dim">{t.type === "income" ? "Income" : t.category}</span>
-            <span className={"mono right" + (t.type === "income" ? " positive" : "")}>
-              {t.type === "income" ? "+" : "-"}{fmt2(t.amount)}
-            </span>
-            <button className="icon-btn" onClick={() => remove(t.id)} aria-label="Delete"><Trash2 size={14} /></button>
-          </div>
-        ))}
-      </div>
+      )}
     </div>
   );
 }

@@ -151,17 +151,22 @@ body {
 .btn-secondary:hover { background: var(--sage); }
 .btn-secondary:disabled { opacity: 0.6; cursor: default; }
 
+.tx-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 22px; }
+.tx-table { min-width: 0; }
+
 .tx-list { border-top: 1px solid var(--line); }
 .tx-list-head, .tx-row {
   display: grid;
-  grid-template-columns: 100px 1fr 120px 100px 28px;
+  grid-template-columns: 90px 1fr 100px 100px 28px;
   gap: 8px;
   align-items: center;
   padding: 8px 2px;
   font-size: 13px;
 }
+.tx-list-head.no-category, .tx-row.no-category { grid-template-columns: 90px 1fr 100px 28px; }
 .tx-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
 .tx-row { border-bottom: 1px solid var(--line); }
+.tx-row.total-row { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
 .icon-btn { background: none; border: none; cursor: pointer; color: #948c78; padding: 4px; }
 .icon-btn:hover { color: var(--rust); }
 
