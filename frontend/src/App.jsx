@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
 import Overview from "./components/Overview";
+import Budgets from "./components/Budgets";
 import Transactions from "./components/Transactions";
 import Accounts from "./components/Accounts";
 import Debts from "./components/Debts";
@@ -32,6 +33,7 @@ export default function App() {
     <div className="app-shell">
       <Sidebar tab={tab} setTab={setTab} onLogout={handleLogout} />
       {tab === "overview" && <Overview token={token} />}
+      {tab === "budgets" && <Budgets token={token} />}
       {tab === "transactions" && <Transactions token={token} />}
       {tab === "accounts" && <Accounts token={token} />}
       {tab === "debts" && <Debts token={token} />}

@@ -138,9 +138,25 @@ def _migrate_legacy_balances_to_accounts() -> None:
                 )
 
 
+def _migrate_budget_columns() -> None:
+    """The Budget column was originally named monthly_amount before settling on
+    monthly_target. Rename it in place on any database created during that window."""
+    inspector = inspect(engine)
+    if "budgets" not in inspector.get_table_names():
+        return
+    existing = {col["name"] for col in inspector.get_columns("budgets")}
+    if "monthly_target" in existing:
+        return
+    if "monthly_amount" not in existing:
+        return
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE budgets RENAME COLUMN monthly_amount TO monthly_target"))
+
+
 _migrate_missing_columns()
 _migrate_net_worth_snapshot_columns()
 _migrate_legacy_balances_to_accounts()
+_migrate_budget_columns()
 
 app = FastAPI(title="Ledger API", version="0.1.0")
 
