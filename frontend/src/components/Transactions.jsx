@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { api } from "../api";
-
-const CATEGORIES = [
-  "Housing", "Food", "Transportation", "Utilities", "Insurance",
-  "Debt", "Subscriptions", "Entertainment", "Shopping", "Health", "Other",
-];
+import { CATEGORIES } from "../categories";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmt2 = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

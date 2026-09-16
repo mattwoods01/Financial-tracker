@@ -6,7 +6,16 @@ from sqlalchemy import inspect, text
 
 from app.config import settings
 from app.database import Base, engine
-from app.routers import accounts as accounts_router, allocate, auth, debts, networth, settings as settings_router, transactions
+from app.routers import (
+    accounts as accounts_router,
+    allocate,
+    auth,
+    budgets as budgets_router,
+    debts,
+    networth,
+    settings as settings_router,
+    transactions,
+)
 
 # Creates tables if they don't exist yet. Fine for getting started; once this is in
 # real use, switch to Alembic migrations instead of relying on this.
@@ -35,22 +44,49 @@ def _migrate_missing_columns() -> None:
 
 def _migrate_net_worth_snapshot_columns() -> None:
     """net_worth_snapshots used to store one column per balance type; it's now a single
-    total_assets figure (individual balances live in accounts instead). Add the column
-    and backfill it from the old ones on a pre-existing table."""
+    total_assets figure (individual balances live in accounts instead). Add the column,
+    backfill it from the old ones, then rebuild the table to actually drop those old
+    columns — they were declared NOT NULL, so just leaving them in place (as we do for
+    other superseded columns) breaks every future insert since new rows never set them.
+    SQLite can't ALTER a column's nullability directly, hence the rebuild."""
     inspector = inspect(engine)
     if "net_worth_snapshots" not in inspector.get_table_names():
         return
     existing = {col["name"] for col in inspector.get_columns("net_worth_snapshots")}
-    if "total_assets" in existing:
+    legacy_cols = {"checking_balance", "savings_balance", "brokerage_balance", "retirement_balance"}
+    needs_total_assets = "total_assets" not in existing
+    needs_rebuild = bool(legacy_cols & existing)
+    if not needs_total_assets and not needs_rebuild:
         return
+
     with engine.begin() as conn:
-        conn.execute(text("ALTER TABLE net_worth_snapshots ADD COLUMN total_assets FLOAT DEFAULT 0"))
-        legacy_cols = {"checking_balance", "savings_balance", "brokerage_balance", "retirement_balance"}
-        if legacy_cols <= existing:
+        if needs_total_assets:
+            conn.execute(text("ALTER TABLE net_worth_snapshots ADD COLUMN total_assets FLOAT DEFAULT 0"))
+            if legacy_cols <= existing:
+                conn.execute(text(
+                    "UPDATE net_worth_snapshots SET total_assets = "
+                    "COALESCE(checking_balance, 0) + COALESCE(savings_balance, 0) + "
+                    "COALESCE(brokerage_balance, 0) + COALESCE(retirement_balance, 0)"
+                ))
+        if needs_rebuild:
             conn.execute(text(
-                "UPDATE net_worth_snapshots SET total_assets = "
-                "COALESCE(checking_balance, 0) + COALESCE(savings_balance, 0) + "
-                "COALESCE(brokerage_balance, 0) + COALESCE(retirement_balance, 0)"
+                "CREATE TABLE net_worth_snapshots_new ("
+                "id VARCHAR NOT NULL PRIMARY KEY, "
+                "user_id VARCHAR NOT NULL REFERENCES users (id), "
+                "date DATE NOT NULL, "
+                "total_assets FLOAT, "
+                "total_debt FLOAT, "
+                "net_worth FLOAT, "
+                "CONSTRAINT uq_net_worth_user_date UNIQUE (user_id, date))"
+            ))
+            conn.execute(text(
+                "INSERT INTO net_worth_snapshots_new (id, user_id, date, total_assets, total_debt, net_worth) "
+                "SELECT id, user_id, date, total_assets, total_debt, net_worth FROM net_worth_snapshots"
+            ))
+            conn.execute(text("DROP TABLE net_worth_snapshots"))
+            conn.execute(text("ALTER TABLE net_worth_snapshots_new RENAME TO net_worth_snapshots"))
+            conn.execute(text(
+                "CREATE INDEX IF NOT EXISTS ix_net_worth_snapshots_user_id ON net_worth_snapshots (user_id)"
             ))
 
 
@@ -123,6 +159,7 @@ app.include_router(debts.router)
 app.include_router(accounts_router.router)
 app.include_router(allocate.router)
 app.include_router(networth.router)
+app.include_router(budgets_router.router)
 
 
 @app.get("/health")

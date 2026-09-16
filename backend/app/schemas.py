@@ -106,6 +106,20 @@ class AccountOut(AccountCreate):
         from_attributes = True
 
 
+# ---- Budgets ----
+
+class BudgetSet(BaseModel):
+    monthly_target: float = Field(ge=0)
+
+
+class BudgetOut(BaseModel):
+    category: str
+    monthly_target: float
+
+    class Config:
+        from_attributes = True
+
+
 # ---- Allocation ----
 
 class AllocationStep(BaseModel):

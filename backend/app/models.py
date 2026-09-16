@@ -34,6 +34,9 @@ class User(Base):
     net_worth_snapshots: Mapped[list["NetWorthSnapshot"]] = relationship(
         "NetWorthSnapshot", back_populates="user", cascade="all, delete-orphan"
     )
+    budgets: Mapped[list["Budget"]] = relationship(
+        "Budget", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserSettings(Base):
@@ -125,3 +128,18 @@ class NetWorthSnapshot(Base):
     net_worth: Mapped[float] = mapped_column(Float, default=0)
 
     user: Mapped["User"] = relationship("User", back_populates="net_worth_snapshots")
+
+
+class Budget(Base):
+    """One monthly spending target per category. Compared against this month's expense
+    transactions in that category (Overview) to flag when the user is over."""
+    __tablename__ = "budgets"
+    __table_args__ = (UniqueConstraint("user_id", "category", name="uq_budget_user_category"),)
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=gen_uuid)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False, index=True)
+
+    category: Mapped[str] = mapped_column(String, nullable=False)
+    monthly_target: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+
+    user: Mapped["User"] = relationship("User", back_populates="budgets")

@@ -67,4 +67,10 @@ export const api = {
   getAllocation: (token) => request("/allocate", { token }),
 
   getNetWorth: (token) => request("/networth", { token }),
+
+  getBudgets: (token) => request("/budgets", { token }),
+  setBudget: (token, category, monthlyTarget) =>
+    request(`/budgets/${encodeURIComponent(category)}`, { method: "PUT", body: { monthly_target: monthlyTarget }, token }),
+  deleteBudget: (token, category) =>
+    request(`/budgets/${encodeURIComponent(category)}`, { method: "DELETE", token }),
 };
