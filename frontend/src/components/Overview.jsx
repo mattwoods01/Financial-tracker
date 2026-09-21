@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { api } from "../api";
+import { todayMonthKey, monthKey, shiftMonth, monthLabel as formatMonthLabel } from "../month";
 
 const CATEGORY_COLORS = {
   Housing: "#8C6D46",
@@ -17,10 +19,10 @@ const CATEGORY_COLORS = {
 };
 
 const fmt = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
-const monthKey = (isoDate) => isoDate.slice(0, 7);
 
 export default function Overview({ token }) {
   const [transactions, setTransactions] = useState([]);
+  const [month, setMonth] = useState(todayMonthKey);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -36,8 +38,7 @@ export default function Overview({ token }) {
     })();
   }, [token]);
 
-  const thisMonth = monthKey(new Date().toISOString().slice(0, 10));
-  const monthTx = transactions.filter((t) => monthKey(t.date) === thisMonth);
+  const monthTx = transactions.filter((t) => monthKey(t.date) === month);
   const effectiveIncome = monthTx.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const effectiveExpenses = monthTx.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const net = effectiveIncome - effectiveExpenses;
@@ -50,8 +51,8 @@ export default function Overview({ token }) {
     return Object.entries(map).map(([category, total]) => ({ category, total })).sort((a, b) => b.total - a.total);
   }, [monthTx]);
 
-  const monthLabel = new Date(thisMonth + "-02").toLocaleDateString(undefined, { month: "long", year: "numeric" });
   const pieData = categoryBreakdown.map((c) => ({ name: c.category, value: c.total }));
+  const isCurrentMonth = month >= todayMonthKey();
 
   if (loading) return <div className="panel"><p className="empty-note">Loading…</p></div>;
   if (error) return <div className="panel"><p className="auth-error">{error}</p></div>;
@@ -60,7 +61,20 @@ export default function Overview({ token }) {
     <div className="panel">
       <header className="panel-head">
         <h1>Overview</h1>
-        <span className="month-label">{monthLabel}</span>
+        <div className="month-nav">
+          <button className="icon-btn" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Previous month">
+            <ChevronLeft size={16} />
+          </button>
+          <span className="month-label">{formatMonthLabel(month)}</span>
+          <button
+            className="icon-btn"
+            onClick={() => setMonth(shiftMonth(month, 1))}
+            disabled={isCurrentMonth}
+            aria-label="Next month"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
       </header>
 
       <div className="ledger-row-group">
@@ -80,7 +94,7 @@ export default function Overview({ token }) {
 
       <h2 className="section-title">Spending by category</h2>
       {pieData.length === 0 ? (
-        <p className="empty-note">No expenses logged this month yet. Add some in Transactions.</p>
+        <p className="empty-note">No expenses logged for this month. Add some in Transactions.</p>
       ) : (
         <div style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>

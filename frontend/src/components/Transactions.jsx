@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "../api";
 import { CATEGORIES } from "../categories";
+import { todayMonthKey, monthKey, shiftMonth, monthLabel as formatMonthLabel } from "../month";
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmt2 = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const asNumber = (v) => parseFloat(v) || 0;
 
-function TransactionTable({ title, rows, showCategory, onDelete }) {
-  const total = rows.reduce((s, t) => s + t.amount, 0);
+function TransactionTable({ title, rows, showCategory, onEditField, onCommit, onPatch, onDelete }) {
+  const total = rows.reduce((s, t) => s + asNumber(t.amount), 0);
   const rowClass = "tx-row" + (showCategory ? "" : " no-category");
 
   return (
@@ -21,15 +23,35 @@ function TransactionTable({ title, rows, showCategory, onDelete }) {
           <span className="right">Amount</span>
           <span></span>
         </div>
-        {rows.length === 0 && <p className="empty-note">No {title.toLowerCase()} yet.</p>}
+        {rows.length === 0 && <p className="empty-note">No {title.toLowerCase()} for this month.</p>}
         {rows.map((t) => (
           <div className={rowClass} key={t.id}>
-            <span className="mono dim">{t.date}</span>
-            <span>{t.description}</span>
-            {showCategory && <span className="dim">{t.category}</span>}
-            <span className={"mono right" + (!showCategory ? " positive" : "")}>
-              {!showCategory ? "+" : "-"}{fmt2(t.amount)}
-            </span>
+            <input
+              type="text"
+              className="mono"
+              value={t.date}
+              onChange={(e) => onEditField(t.id, "date", e.target.value)}
+              onBlur={() => onCommit(t.id)}
+            />
+            <input
+              type="text"
+              value={t.description}
+              onChange={(e) => onEditField(t.id, "description", e.target.value)}
+              onBlur={() => onCommit(t.id)}
+            />
+            {showCategory && (
+              <select value={t.category} onChange={(e) => onPatch(t.id, { category: e.target.value })}>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+            <input
+              type="number"
+              step="0.01"
+              className={"mono right" + (!showCategory ? " positive" : "")}
+              value={t.amount}
+              onChange={(e) => onEditField(t.id, "amount", e.target.value)}
+              onBlur={() => onCommit(t.id)}
+            />
             <button className="icon-btn" onClick={() => onDelete(t.id)} aria-label="Delete"><Trash2 size={14} /></button>
           </div>
         ))}
@@ -49,6 +71,8 @@ function TransactionTable({ title, rows, showCategory, onDelete }) {
 
 export default function Transactions({ token }) {
   const [transactions, setTransactions] = useState([]);
+  const [month, setMonth] = useState(todayMonthKey);
+  const [showAllMonths, setShowAllMonths] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ date: todayISO(), description: "", category: "Food", amount: "", type: "expense" });
@@ -87,14 +111,67 @@ export default function Transactions({ token }) {
     }
   };
 
-  const sorted = [...transactions].sort((a, b) => (a.date < b.date ? 1 : -1));
+  // Local-only edit for text/number/date fields while typing — committed on blur.
+  const editField = (id, field, value) => {
+    setTransactions((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
+  };
+
+  const save = async (tx) => {
+    try {
+      await api.updateTransaction(token, tx.id, {
+        date: tx.date,
+        description: tx.description,
+        category: tx.category,
+        amount: asNumber(tx.amount),
+        type: tx.type,
+      });
+    } catch (err) {
+      setError(err.message);
+      load();
+    }
+  };
+
+  const commit = (id) => {
+    const tx = transactions.find((t) => t.id === id);
+    if (tx) save(tx);
+  };
+
+  // Immediate-commit for the category select — builds the merged record explicitly
+  // rather than relying on state having already updated by the time we save.
+  const patch = (id, changes) => {
+    const tx = transactions.find((t) => t.id === id);
+    if (!tx) return;
+    const updated = { ...tx, ...changes };
+    setTransactions((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    save(updated);
+  };
+
+  const filtered = showAllMonths ? transactions : transactions.filter((t) => monthKey(t.date) === month);
+  const sorted = [...filtered].sort((a, b) => (a.date < b.date ? 1 : -1));
   const income = sorted.filter((t) => t.type === "income");
   const expenses = sorted.filter((t) => t.type === "expense");
+  const isCurrentMonth = month >= todayMonthKey();
 
   return (
-    <div className="panel">
+    <div className="panel wide">
       <header className="panel-head">
         <h1>Transactions</h1>
+        {!showAllMonths && (
+          <div className="month-nav">
+            <button className="icon-btn" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Previous month">
+              <ChevronLeft size={16} />
+            </button>
+            <span className="month-label">{formatMonthLabel(month)}</span>
+            <button
+              className="icon-btn"
+              onClick={() => setMonth(shiftMonth(month, 1))}
+              disabled={isCurrentMonth}
+              aria-label="Next month"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
       </header>
 
       {error && <p className="auth-error">{error}</p>}
@@ -126,11 +203,22 @@ export default function Transactions({ token }) {
         <button type="submit" className="btn-primary"><Plus size={15} /> Add</button>
       </form>
 
+      <label className="field checkbox-field" style={{ marginTop: 0, marginBottom: 4 }}>
+        <input type="checkbox" checked={showAllMonths} onChange={(e) => setShowAllMonths(e.target.checked)} />
+        <span>Show all months</span>
+      </label>
+
       {loading && <p className="empty-note">Loading…</p>}
       {!loading && (
         <div className="tx-tables">
-          <TransactionTable title="Income" rows={income} showCategory={false} onDelete={remove} />
-          <TransactionTable title="Expenses" rows={expenses} showCategory onDelete={remove} />
+          <TransactionTable
+            title="Income" rows={income} showCategory={false}
+            onEditField={editField} onCommit={commit} onPatch={patch} onDelete={remove}
+          />
+          <TransactionTable
+            title="Expenses" rows={expenses} showCategory
+            onEditField={editField} onCommit={commit} onPatch={patch} onDelete={remove}
+          />
         </div>
       )}
     </div>

@@ -75,6 +75,7 @@ body {
 
 /* ---- Panel ---- */
 .panel { flex: 1; padding: 32px 40px; max-width: 780px; }
+.panel.wide { max-width: 1100px; }
 .panel-head {
   display: flex;
   align-items: baseline;
@@ -85,6 +86,9 @@ body {
 }
 .panel-head h1 { font-family: 'Source Serif 4', serif; font-weight: 600; font-size: 26px; margin: 0; }
 .month-label { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #6b6455; }
+.month-nav { display: flex; align-items: center; gap: 4px; }
+.month-nav .icon-btn { padding: 2px; }
+.month-nav .icon-btn:disabled { color: #d8d2c2; cursor: default; }
 
 .section-title { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 600; margin: 26px 0 12px 0; }
 .empty-note { color: #6b6455; font-size: 13.5px; }
@@ -157,16 +161,31 @@ body {
 .tx-list { border-top: 1px solid var(--line); }
 .tx-list-head, .tx-row {
   display: grid;
-  grid-template-columns: 90px 1fr 100px 100px 28px;
+  grid-template-columns: 92px 1fr 105px 78px 24px;
   gap: 8px;
   align-items: center;
   padding: 8px 2px;
   font-size: 13px;
 }
-.tx-list-head.no-category, .tx-row.no-category { grid-template-columns: 90px 1fr 100px 28px; }
+.tx-list-head.no-category, .tx-row.no-category { grid-template-columns: 92px 1fr 78px 24px; }
 .tx-list-head { color: #6b6455; font-size: 11px; border-bottom: 1px solid var(--line); }
 .tx-row { border-bottom: 1px solid var(--line); }
 .tx-row.total-row { font-weight: 600; border-bottom: 2px solid var(--charcoal); }
+.tx-row input, .tx-row select {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--charcoal);
+  width: 100%;
+}
+.tx-row input:hover, .tx-row select:hover,
+.tx-row input:focus, .tx-row select:focus { border-color: var(--line); background: #fff; }
+.tx-row input.mono, .tx-row select.mono { font-family: 'IBM Plex Mono', monospace; }
+.tx-row input.right { text-align: right; }
+.tx-row input.positive { color: #3E6B52; }
 .icon-btn { background: none; border: none; cursor: pointer; color: #948c78; padding: 4px; }
 .icon-btn:hover { color: var(--rust); }
 

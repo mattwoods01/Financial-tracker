@@ -53,6 +53,7 @@ export const api = {
 
   getTransactions: (token) => request("/transactions", { token }),
   addTransaction: (token, tx) => request("/transactions", { method: "POST", body: tx, token }),
+  updateTransaction: (token, id, tx) => request(`/transactions/${id}`, { method: "PUT", body: tx, token }),
   deleteTransaction: (token, id) => request(`/transactions/${id}`, { method: "DELETE", token }),
 
   getDebts: (token) => request("/debts", { token }),

@@ -60,6 +60,10 @@ class TransactionCreate(BaseModel):
     type: Literal["income", "expense"]
 
 
+class TransactionUpdate(TransactionCreate):
+    pass
+
+
 class TransactionOut(TransactionCreate):
     id: str
 
