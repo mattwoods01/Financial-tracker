@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { api } from "../api";
 
-export default function Login({ onAuthenticated }) {
+export default function Login({ onAuthenticated, notice }) {
   const [mode, setMode] = useState("login"); // "login" | "register"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +34,8 @@ export default function Login({ onAuthenticated }) {
         </div>
 
         <h1 className="auth-title">{mode === "login" ? "Log in" : "Create an account"}</h1>
+
+        {notice && <p className="empty-note" style={{ marginBottom: 10 }}>{notice}</p>}
 
         <label className="field">
           <span>Email</span>

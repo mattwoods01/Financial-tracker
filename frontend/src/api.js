@@ -18,6 +18,12 @@ async function request(path, { method = "GET", body, token } = {}) {
     } catch {
       // response wasn't JSON, keep the generic message
     }
+    // A 401 here means the stored token is expired/invalid, not a login attempt (that's a
+    // separate fetch below). Tell the app to drop it and bounce to the login screen instead
+    // of leaving every page stuck showing a raw "Could not validate credentials" error.
+    if (res.status === 401 && token) {
+      window.dispatchEvent(new Event("ledger:unauthorized"));
+    }
     throw new Error(detail);
   }
 
