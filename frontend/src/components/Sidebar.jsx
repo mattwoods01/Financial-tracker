@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutGrid, PiggyBank, Receipt, Landmark, CreditCard, Wallet, TrendingUp, LogOut } from "lucide-react";
+import { LayoutGrid, PiggyBank, Receipt, Landmark, CreditCard, Wallet, TrendingUp, LineChart, LogOut } from "lucide-react";
 
 export default function Sidebar({ tab, setTab, onLogout }) {
   const items = [
@@ -9,6 +9,7 @@ export default function Sidebar({ tab, setTab, onLogout }) {
     { id: "accounts", label: "Accounts", icon: Wallet },
     { id: "debts", label: "Debts", icon: CreditCard },
     { id: "networth", label: "Net Worth", icon: TrendingUp },
+    { id: "markets", label: "Markets", icon: LineChart },
     { id: "allocate", label: "Allocate", icon: Landmark },
   ];
   return (

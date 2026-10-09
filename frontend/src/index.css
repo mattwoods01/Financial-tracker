@@ -99,6 +99,38 @@ body {
 .net-worth-total { font-size: 40px; font-weight: 600; line-height: 1; }
 .net-worth-change { font-size: 13.5px; }
 
+/* ---- Markets ---- */
+.market-search { display: flex; gap: 8px; margin-bottom: 18px; max-width: 420px; }
+.market-search input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--charcoal);
+}
+.market-hero { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.market-symbol { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 600; }
+.market-price { font-size: 30px; font-weight: 600; line-height: 1; }
+.market-change { font-size: 14px; }
+.range-tabs { display: flex; gap: 2px; }
+.range-tab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: #6b6455;
+  cursor: pointer;
+}
+.range-tab:first-child { border-radius: 2px 0 0 2px; }
+.range-tab:last-child { border-radius: 0 2px 2px 0; }
+.range-tab + .range-tab { border-left: none; }
+.range-tab:hover { background: var(--sage); }
+.range-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
 .ledger-row-group { border-top: 1px solid var(--line); }
 .ledger-row { display: flex; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .ledger-row.total { font-weight: 600; border-bottom: 2px solid var(--charcoal); }

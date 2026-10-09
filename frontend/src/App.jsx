@@ -8,6 +8,7 @@ import Accounts from "./components/Accounts";
 import Debts from "./components/Debts";
 import Allocate from "./components/Allocate";
 import NetWorth from "./components/NetWorth";
+import Markets from "./components/Markets";
 
 const TOKEN_KEY = "ledger:token";
 
@@ -58,6 +59,7 @@ export default function App() {
       {tab === "debts" && <Debts token={token} />}
       {tab === "allocate" && <Allocate token={token} />}
       {tab === "networth" && <NetWorth token={token} />}
+      {tab === "markets" && <Markets token={token} />}
     </div>
   );
 }

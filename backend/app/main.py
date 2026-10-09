@@ -12,6 +12,7 @@ from app.routers import (
     auth,
     budgets as budgets_router,
     debts,
+    market,
     networth,
     settings as settings_router,
     transactions,
@@ -138,6 +139,52 @@ def _migrate_legacy_balances_to_accounts() -> None:
                 )
 
 
+def _migrate_user_settings_columns() -> None:
+    """user_settings has accumulated several superseded columns across past migrations
+    (monthly_take_home, monthly_expenses_manual, emergency_fund_balance, brokerage/
+    checking/retirement_balance, the two use_transactions_for_* toggles, and the old
+    emergency-fund toggle). Unlike the newer additions, these were part of the
+    original table and declared NOT NULL — leaving them in place like we do for
+    harmless orphaned columns means every INSERT that doesn't set them (i.e. every new
+    user registering) fails outright. Must run after _migrate_legacy_balances_to_accounts,
+    which still needs to read some of these columns before they're dropped here."""
+    inspector = inspect(engine)
+    if "user_settings" not in inspector.get_table_names():
+        return
+    existing = {col["name"] for col in inspector.get_columns("user_settings")}
+    legacy_cols = {
+        "monthly_take_home", "monthly_expenses_manual", "emergency_fund_balance",
+        "brokerage_balance", "checking_balance", "retirement_balance",
+        "use_brokerage_checking_as_emergency_fund",
+        "use_transactions_for_expenses", "use_transactions_for_income",
+    }
+    if not (legacy_cols & existing):
+        return
+
+    with engine.begin() as conn:
+        conn.execute(text(
+            "CREATE TABLE user_settings_new ("
+            "id VARCHAR NOT NULL PRIMARY KEY, "
+            "user_id VARCHAR NOT NULL UNIQUE REFERENCES users (id), "
+            "gross_annual_salary FLOAT, "
+            "current_contribution_percent FLOAT, "
+            "employer_match_limit FLOAT, "
+            "age INTEGER, "
+            "emergency_fund_target_months FLOAT, "
+            "roth_percent FLOAT, "
+            "disabled_allocation_steps VARCHAR DEFAULT '')"
+        ))
+        conn.execute(text(
+            "INSERT INTO user_settings_new "
+            "(id, user_id, gross_annual_salary, current_contribution_percent, employer_match_limit, "
+            "age, emergency_fund_target_months, roth_percent, disabled_allocation_steps) "
+            "SELECT id, user_id, gross_annual_salary, current_contribution_percent, employer_match_limit, "
+            "age, emergency_fund_target_months, roth_percent, disabled_allocation_steps FROM user_settings"
+        ))
+        conn.execute(text("DROP TABLE user_settings"))
+        conn.execute(text("ALTER TABLE user_settings_new RENAME TO user_settings"))
+
+
 def _migrate_budget_columns() -> None:
     """The Budget column was originally named monthly_amount before settling on
     monthly_target. Rename it in place on any database created during that window."""
@@ -156,6 +203,7 @@ def _migrate_budget_columns() -> None:
 _migrate_missing_columns()
 _migrate_net_worth_snapshot_columns()
 _migrate_legacy_balances_to_accounts()
+_migrate_user_settings_columns()
 _migrate_budget_columns()
 
 app = FastAPI(title="Ledger API", version="0.1.0")
@@ -176,6 +224,7 @@ app.include_router(accounts_router.router)
 app.include_router(allocate.router)
 app.include_router(networth.router)
 app.include_router(budgets_router.router)
+app.include_router(market.router)
 
 
 @app.get("/health")

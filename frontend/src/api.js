@@ -80,4 +80,7 @@ export const api = {
     request(`/budgets/${encodeURIComponent(category)}`, { method: "PUT", body: { monthly_target: monthlyTarget }, token }),
   deleteBudget: (token, category) =>
     request(`/budgets/${encodeURIComponent(category)}`, { method: "DELETE", token }),
+
+  getQuote: (token, symbol, range) =>
+    request(`/market/quote/${encodeURIComponent(symbol)}?range=${encodeURIComponent(range)}`, { token }),
 };

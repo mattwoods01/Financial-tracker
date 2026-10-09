@@ -161,3 +161,22 @@ class NetWorthOut(BaseModel):
     net_worth: float
     by_type: list[NetWorthTypeTotal]
     history: list[NetWorthPoint]
+
+
+# ---- Market data ----
+
+class MarketPoint(BaseModel):
+    time: int  # unix seconds
+    price: float
+
+
+class MarketQuote(BaseModel):
+    symbol: str
+    currency: str
+    exchange: str | None = None
+    price: float
+    previous_close: float
+    change: float
+    change_percent: float
+    range: str
+    points: list[MarketPoint]
