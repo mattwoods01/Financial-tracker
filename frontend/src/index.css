@@ -130,6 +130,9 @@ body {
 .range-tab + .range-tab { border-left: none; }
 .range-tab:hover { background: var(--sage); }
 .range-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.compare-row { display: flex; align-items: center; gap: 16px; margin-top: 10px; font-size: 12.5px; }
+.compare-checkbox { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.compare-checkbox input { width: auto; cursor: pointer; }
 
 .ledger-row-group { border-top: 1px solid var(--line); }
 .ledger-row { display: flex; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
